@@ -1,0 +1,86 @@
+################Step 1: Create SH Files for Each Sample################
+#Function: This script creates a .sh file for each sample, which includes commands for alignment, variant calling, and VCF reheadering.
+#this code creates sh files for every sample - one should end up with as many sh files as there are samples
+
+#!/bin/bash
+
+# Define the parent directory and reference genome
+PARENT_DIR=<INPUT> #IMPT TO CHANGE - Folder in which all raw samples are
+REFERENCE_GENOME=<INPUT> #IMPT TO CHANGE - Reference genome file, may or may not be indexed
+OUTPUT_DIR=$(dirname "$PARENT_DIR")
+
+# Define directories for BAM, VCF, intermediate, and sh files
+BAM_DIR="$OUTPUT_DIR/bam_files"
+VCF_DIR="$OUTPUT_DIR/vcf_files"
+INTERMEDIATE_DIR="$OUTPUT_DIR/intermediate_files"
+SH_DIR="$OUTPUT_DIR/sh_files"
+
+# Create directories only if they do not exist
+[ ! -d "$BAM_DIR" ] && mkdir -p "$BAM_DIR"
+[ ! -d "$VCF_DIR" ] && mkdir -p "$VCF_DIR"
+[ ! -d "$INTERMEDIATE_DIR" ] && mkdir -p "$INTERMEDIATE_DIR"
+[ ! -d "$SH_DIR" ] && mkdir -p "$SH_DIR"
+
+# Check if BWA index files exist, if not, create them
+if [ ! -f "${REFERENCE_GENOME}.bwt" ]; then
+    echo "Indexing reference genome with BWA..."
+    bwa index "$REFERENCE_GENOME"
+else
+    echo "Reference genome index already done."
+fi
+
+# Loop through each subdirectory in the parent directory
+for SAMPLE_DIR in "$PARENT_DIR"/*; do
+    if [ -d "$SAMPLE_DIR" ]; then
+        SAMPLE_NAME=$(basename "$SAMPLE_DIR")
+        OUTPUT_SH="$SH_DIR/$SAMPLE_NAME.sh"
+        
+        echo "Processing sample: $SAMPLE_NAME"
+        echo "Output script: $OUTPUT_SH"
+
+        # Create the shell script for this sample
+        {
+            echo "#!/bin/bash"
+            echo "#PBS -q normal"
+            echo "#PBS -l select=1:ncpus=1:mem=100G"
+            echo "#PBS -l walltime=24:00:00"
+            echo "#PBS -N $SAMPLE_NAME"
+            echo "#PBS -P Personal"
+
+            # Load modules
+            echo "module load bwa"
+            echo "module load samtools"
+            echo "module load bcftools"
+
+            # Concatenate reads if there are multiple files
+            echo "cat $SAMPLE_DIR/*_1.fq.gz > $INTERMEDIATE_DIR/${SAMPLE_NAME}_R1.fq.gz"
+            echo "cat $SAMPLE_DIR/*_2.fq.gz > $INTERMEDIATE_DIR/${SAMPLE_NAME}_R2.fq.gz"
+
+            # BWA MEM for alignment
+            echo "bwa mem $REFERENCE_GENOME $INTERMEDIATE_DIR/${SAMPLE_NAME}_R1.fq.gz $INTERMEDIATE_DIR/${SAMPLE_NAME}_R2.fq.gz | samtools sort -o $BAM_DIR/${SAMPLE_NAME}.bam"
+
+            # Index the BAM file
+            echo "samtools index $BAM_DIR/${SAMPLE_NAME}.bam"
+
+            # Call variants using BCFtools
+            echo "bcftools mpileup -Ou -q 20 -Q 30 -f $REFERENCE_GENOME $BAM_DIR/${SAMPLE_NAME}.bam | bcftools call -mv -Ob -o $VCF_DIR/${SAMPLE_NAME}.bcf"
+
+#            # Create a header file for reheadering
+#            echo "echo \"$SAMPLE_NAME\" > $INTERMEDIATE_DIR/${SAMPLE_NAME}_header.txt"
+
+#            # Reheader the VCF file to change the sample name
+#            echo "bcftools reheader -s $INTERMEDIATE_DIR/${SAMPLE_NAME}_header.txt -o $VCF_DIR/${SAMPLE_NAME}.bcf $VCF_DIR/${SAMPLE_NAME}.bcf"
+
+            # Index the VCF file
+            echo "bcftools index $VCF_DIR/${SAMPLE_NAME}.bcf"
+
+#            # Clean up the temporary header file
+#            echo "rm $INTERMEDIATE_DIR/${SAMPLE_NAME}_header.txt"
+        } > "$OUTPUT_SH"
+
+        # Make the script executable
+#        chmod +x "$OUTPUT_SH"
+    else
+        echo "Skipping non-directory: $SAMPLE_DIR"
+    fi
+done
