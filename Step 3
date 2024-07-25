@@ -1,0 +1,91 @@
+################Step 3: Merge and Filter VCF Files################
+# Function: This script merges individual VCF files, applies PLINK filters, and converts the files to PLINK format.
+# It will be helpful to run this as an sh file.
+
+#!/bin/bash
+#PBS -q normal
+#PBS -l select=1:ncpus=1:mem=100G
+#PBS -l walltime=96:00:00
+#PBS -N Merge_vcf
+#PBS -P Personal
+
+# Define directories
+VCF_DIR=<INPUT> # Directory containing VCF files
+PLINK_DIR=<INPUT> # Directory for PLINK files
+PLINK=<INPUT> # Path to the PLINK executable
+# Create directories only if they do not exist
+[ ! -d "$PLINK_DIR" ] && mkdir -p "$PLINK_DIR"
+
+# Load bcftools module
+module load bcftools
+
+# Change to the VCF directory
+cd "$VCF_DIR" || { echo "Failed to change directory to $VCF_DIR"; exit 1; }
+
+# Merge all VCF files in the directory
+MERGED_VCF="merged_samples.vcf.gz" # Change name if necessary
+bcftools merge -0 --missing-to-ref -Oz -o "$MERGED_VCF" *.bcf
+
+# Index the merged VCF file
+bcftools index "$MERGED_VCF"
+
+# Convert the merged VCF to PLINK format
+$PLINK --vcf "$MERGED_VCF"
+      --keep-allele-order \
+      --allow-extra-chr \
+      --allow-no-sex \
+      --double-id \ # Required to deal with "_" in sample names
+      --make-bed \
+      --out "$PLINK_DIR/filtered_samples_temp"
+
+# Apply SNPs only filter
+$PLINK --bfile "$PLINK_DIR/filtered_samples_temp" \
+      --keep-allele-order \
+      --allow-extra-chr \
+      --allow-no-sex \
+      --snps-only \ # Keeps only SNPs
+      --make-bed \
+      --out "$PLINK_DIR/filtered_samples_snps"
+
+# Apply missing genotype filter
+$PLINK --bfile "$PLINK_DIR/filtered_samples_snps" \
+      --keep-allele-order \
+      --allow-extra-chr \
+      --allow-no-sex \
+      --geno 0.1 \ # Missing genotype filter - edit accordingly
+      --make-bed \
+      --out "$PLINK_DIR/filtered_samples_snps_geno"
+
+# Apply MAF filter
+$PLINK --bfile "$PLINK_DIR/filtered_samples_snps_geno" \
+      --keep-allele-order \
+      --allow-extra-chr \
+      --allow-no-sex \
+      --maf 0.01 \ # MAF filter - edit accordingly
+      --make-bed \
+      --out "$PLINK_DIR/filtered_samples_snps_geno_maf"
+
+# Deal with duplicate variant ID names
+$PLINK --bfile "$PLINK_DIR/filtered_samples_snps_geno_maf" \
+      --keep-allele-order \
+      --allow-extra-chr \
+      --allow-no-sex \
+      --set-missing-var-ids @:# \ # Deal with duplicate variant ID names
+      --make-bed \
+      --out "$PLINK_DIR/final"
+
+# Create a PED file from the BED file
+$PLINK --bfile "$PLINK_DIR/final" \
+      --keep-allele-order \
+      --allow-no-sex \
+      --allow-extra-chr \
+      --recode --tab \
+      --out "$PLINK_DIR/final"
+
+# Create a final vcf file from the BED file
+$PLINK --bfile "$PLINK_DIR/final" \
+      --keep-allele-order \
+      --allow-no-sex \
+      --allow-extra-chr \
+      --recode vcf \
+      --out "$PLINK_DIR/final"
