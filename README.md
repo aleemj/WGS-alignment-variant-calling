@@ -87,5 +87,3 @@ Alignment and variant calling code for WGS samples.
 #merge all the individual, indexed vcf files. Then it should filter accordingly and convert necesary file format using plink. Output final genotype files into a new subdirectory.
 
 #IMPT - edit VCF_DIR and PLINK_DIR and specific where PLINK tool is located
-
-#last updated 23072025
