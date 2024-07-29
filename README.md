@@ -1,7 +1,7 @@
 # WGS-alignment-variant-calling
 Alignment and variant calling code for WGS samples.
 
-#last updated by Adrian on 25 July 2024
+#last updated by Adrian on 28 July 2024
 
 ##########Latest update##########
 
