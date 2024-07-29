@@ -76,17 +76,11 @@ Alignment and variant calling code for WGS samples.
 
 #IMPT - edit PARENT_DIR and REFERENCE_GENOME
 
-#last updated 22072025
-
-
 #STEP 2
 
 #runs as many sample sh files as the system allows, will check for already completed vcf files before running remaining sh files. This line of code can be run as many times over the course of a few days until all samples are created.
 
 #IMPT - edit SH_DIR and VCF_DIR directories
-
-#last updated 22072024
-
 
 #STEP 3 
 
