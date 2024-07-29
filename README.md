@@ -13,6 +13,8 @@ Alignment and variant calling code for WGS samples.
 
 #25 July 2024 - step 3 creates plink directory which was missing from previous version
 
+#28 July 2024 - step 3 syntax was causing problems because of syntax, has now been solved for plink
+
 ##########UPDATE notes for Adrian##########
 
 #what are the best CPU options?
