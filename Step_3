@@ -40,7 +40,7 @@ $PLINK --bfile "$PLINK_DIR/filtered_samples_temp" --keep-allele-order --allow-ex
 $PLINK --bfile "$PLINK_DIR/filtered_samples_snps" --keep-allele-order --allow-extra-chr --allow-no-sex --geno 0.1 --make-bed --out "$PLINK_DIR/filtered_samples_snps_geno"
 
 # Apply MAF filter
-$PLINK --bfile "$PLINK_DIR/filtered_samples_snps_geno" --keep-allele-order --allow-extra-chr --allow-no-sex --maf 0.01 --make-bed --out "$PLINK_DIR/filtered_samples_snps_geno_maf"
+$PLINK --bfile "$PLINK_DIR/filtered_samples_snps_geno" --keep-allele-order --allow-extra-chr --allow-no-sex --maf 0.05 --make-bed --out "$PLINK_DIR/filtered_samples_snps_geno_maf"
 
 # Deal with duplicate variant ID names
 $PLINK --bfile "$PLINK_DIR/filtered_samples_snps_geno_maf" --keep-allele-order --allow-extra-chr --allow-no-sex --set-missing-var-ids @:# --make-bed --out "$PLINK_DIR/final"
