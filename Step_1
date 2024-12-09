@@ -76,11 +76,8 @@ done
             # Call variants using BCFtools
             echo "bcftools mpileup -Ou -q 20 -Q 30 -f $REFERENCE_GENOME $BAM_DIR/${SAMPLE_NAME}.bam | bcftools call -mv -Ob -o $VCF_DIR/${SAMPLE_NAME}.bcf"
 
-#            # Create a header file for reheadering
-#            echo "echo \"$SAMPLE_NAME\" > $INTERMEDIATE_DIR/${SAMPLE_NAME}_header.txt"
-
-#            # Reheader the VCF file to change the sample name
-#            echo "bcftools reheader -s $INTERMEDIATE_DIR/${SAMPLE_NAME}_header.txt -o $VCF_DIR/${SAMPLE_NAME}.bcf $VCF_DIR/${SAMPLE_NAME}.bcf"
+############################ CHANGE TO ##################################
+            echo "bcftools mpileup -Ou -q 20 -Q 30 -f $REFERENCE_GENOME $BAM_DIR/*.bam | bcftools call -mv -Oz -o $VCF_DIR/output.vcf"
 
             # Index the VCF file
             echo "bcftools index $VCF_DIR/${SAMPLE_NAME}.bcf"
