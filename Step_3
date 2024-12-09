@@ -5,7 +5,7 @@
 #!/bin/bash
 #PBS -q normal
 #PBS -l select=1:ncpus=1:mem=100G
-#PBS -l walltime=24:00:00
+#PBS -l walltime=96:00:00
 #PBS -N Merge_vcf
 #PBS -P Personal
 
@@ -23,12 +23,18 @@ module load bcftools
 # Change to the VCF directory
 cd "$VCF_DIR" || { echo "Failed to change directory to $VCF_DIR"; exit 1; }
 
+# Call variants using BCFtools
+echo "bcftools mpileup -Ou -q 20 -Q 30 -f $REFERENCE_GENOME $BAM_DIR/*.bam | bcftools call -mv -Oz -o $VCF_DIR/output.vcf"
+
+# Index the VCF file
+echo "bcftools index $VCF_DIR/${SAMPLE_NAME}.bcf"
+
 # Merge all VCF files in the directory
-MERGED_VCF="$PLINK_DIR/merged_samples.vcf.gz" # Change name if necessary
-bcftools merge -0 --missing-to-ref -Oz -o "$MERGED_VCF" *.bcf
+#MERGED_VCF="$PLINK_DIR/merged_samples.vcf.gz" # Change name if necessary
+#bcftools merge -0 --missing-to-ref -Oz -o "$MERGED_VCF" *.bcf
 
 # Index the merged VCF file
-bcftools index "$MERGED_VCF"
+#bcftools index "$MERGED_VCF"
 
 # Convert the merged VCF to PLINK format
 $PLINK --vcf "$MERGED_VCF" --keep-allele-order --allow-extra-chr --allow-no-sex --double-id --make-bed --out "$PLINK_DIR/filtered_samples_temp"
