@@ -4,16 +4,16 @@
 #!/bin/bash
 # Define the directories
 SH_DIR=<INPUT> #IMPT TO CHANGE - folder where samples sh files are contained 
-VCF_DIR=<INPUT> #IMPT TO CHANGE - folder where individual vcf files are
+BAM_DIR=<INPUT> #IMPT TO CHANGE - folder where individual bam files are
 # Change to the SH_DIR directory
 cd "$SH_DIR" || { echo "Failed to change directory to $SH_DIR"; exit 1; }
 # Get a list of all .sh files
 sh_files=("$SH_DIR"/*.sh)
-# Loop through each .sh file and submit it if the corresponding VCF file does not exist
+# Loop through each .sh file and submit it if the corresponding BAM file does not exist
 for sh_file in "${sh_files[@]}"; do
     sample_name=$(basename "$sh_file" .sh)
-    vcf_file="$VCF_DIR/${sample_name}.bcf"
-    if [ ! -f "$vcf_file" ]; then
+    bam_file="$BAM_DIR/${sample_name}.bam"
+    if [ ! -f "$bam_file" ]; then
         echo "Submitting job: $sh_file"
         qsub "$sh_file"
     else
