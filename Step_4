@@ -1,13 +1,7 @@
 #!/bin/bash
 
-#PBS -q normal
-#PBS -l select=1:ncpus=4:mem=64G
-#PBS -l walltime=24:00:00
-#PBS -N GenerateVariantJobs
-#PBS -P Personal
-
 # Load modules required for this step
-module load bcftools
+module load samtools
 
 # Define directories
 REFERENCE_GENOME="/path/to/reference.fa"  # Replace with the actual reference genome path
