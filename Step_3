@@ -36,7 +36,7 @@ export CHRNO=1
 # Perform BCFtools commands using 4 threads, previously determined to have optimal trade-off between computational resource and time.
 # Change the name of the actual FASTA file accordingly
 bcftools mpileup --threads 4 -Ou -q 20 -Q 30 -f "$REFERENCE_GENOME" \
-        -r "scaffold_$CHRNO" -b "$(echo $BAM_DIR/BAMfile_list.txt)" | \
+        -r "CHR_$CHRNO" -b "$(echo $BAM_DIR/BAMfile_list.txt)" | \
         bcftools call --threads 4 -mv -Ob \
         -o "$BCF_DIR/variants_chr$CHRNO.bcf"
 
