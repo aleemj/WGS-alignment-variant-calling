@@ -28,7 +28,7 @@ fi
 # Generate a list of chromosomes from the .fai file
 CHROMOSOMES=$(awk '{print $1}' "${REFERENCE_GENOME}.fai")
 
-# Generate and submit jobs for each chromosome
+# Generate jobs for each chromosome
 for CHR in $CHROMOSOMES; do
     JOB_SCRIPT="$SCRIPT_DIR/variant_call_${CHR}.sh"
     OUTPUT_BCF="$BCF_DIR/variants_${CHR}.bcf"
