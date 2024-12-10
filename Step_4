@@ -28,6 +28,11 @@ fi
 # Generate a list of chromosomes from the .fai file
 CHROMOSOMES=$(awk '{print $1}' "${REFERENCE_GENOME}.fai")
 
+# Collating the filenames of all BAM files into a .txt file for bcftools multiple sample variant calling
+# in the same directory as where the BAM files were.
+find "$BAM_DIR" -type f -name "*.bam" | sort | uniq > \
+    "$BAM_DIR/BAMfile_list.txt"
+
 # Generate jobs for each chromosome
 for CHR in $CHROMOSOMES; do
     JOB_SCRIPT="$SCRIPT_DIR/variant_call_${CHR}.sh"
