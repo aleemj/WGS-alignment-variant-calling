@@ -1,4 +1,63 @@
-for CHR in {1..22}; do
-    sed "s/export CHRNO=1/export CHRNO=$CHR/" variant_call_chr1.sh > variant_call_chr$CHR.sh
-    qsub variant_call_chr$CHR.sh
+#!/bin/bash
+
+#PBS -q normal
+#PBS -l select=1:ncpus=4:mem=64G
+#PBS -l walltime=24:00:00
+#PBS -N GenerateVariantJobs
+#PBS -P Personal
+
+# Load modules required for this step
+module load bcftools
+
+# Define directories
+REFERENCE_GENOME="/path/to/reference.fa"  # Replace with the actual reference genome path
+BAM_DIR="/path/to/bam_files"             # Replace with the actual BAM directory path
+BCF_DIR="/path/to/output_bcf"            # Replace with the actual output directory path
+SCRIPT_DIR="/path/to/job_scripts"        # Replace with the directory to store job scripts
+
+# Ensure output directories exist
+[ -d "$BCF_DIR" ] || mkdir -p "$BCF_DIR"
+[ -d "$SCRIPT_DIR" ] || mkdir -p "$SCRIPT_DIR"
+
+# Ensure the reference genome is indexed
+if [ ! -f "${REFERENCE_GENOME}.fai" ]; then
+    echo "Indexing reference genome..."
+    samtools faidx "$REFERENCE_GENOME"
+else
+    echo "Reference genome already indexed."
+fi
+
+# Generate a list of chromosomes from the .fai file
+CHROMOSOMES=$(awk '{print $1}' "${REFERENCE_GENOME}.fai")
+
+# Generate and submit jobs for each chromosome
+for CHR in $CHROMOSOMES; do
+    JOB_SCRIPT="$SCRIPT_DIR/variant_call_${CHR}.sh"
+    OUTPUT_BCF="$BCF_DIR/variants_${CHR}.bcf"
+
+    # Skip if the BCF file for this chromosome already exists
+    if [ -f "$OUTPUT_BCF" ]; then
+        echo "BCF file for chromosome $CHR already exists. Skipping..."
+        continue
+    fi
+
+    # Create the job script
+    cat <<EOF > "$JOB_SCRIPT"
+#!/bin/bash
+#PBS -q normal
+#PBS -l select=1:ncpus=4:mem=64G
+#PBS -l walltime=24:00:00
+#PBS -N VariantCall_${CHR}
+#PBS -P Personal
+
+module load bcftools
+
+# Perform variant calling for chromosome $CHR
+bcftools mpileup --threads 4 -Ou -q 20 -Q 30 -f "$REFERENCE_GENOME" \
+    -r "$CHR" -b "$BAM_DIR/BAMfile_list.txt" | \
+    bcftools call --threads 4 -mv -Ob -o "$OUTPUT_BCF"
+
+echo "Variant calling completed for chromosome $CHR"
+EOF
+
 done
