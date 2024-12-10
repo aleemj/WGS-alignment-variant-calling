@@ -14,10 +14,9 @@
 module load bcftools
 
 # Define directories
-FASTA_DIR="/path/to/fasta/file/BOleracea"
-BAM_DIR="path/to/BOleracea/bam_files"
-OUTDIR="/path/to/BOleracea/bcf_files"
 REFERENCE_GENOME="/path/to/reference.fa"
+BAM_DIR=<INPUT> #IMPT TO CHANGE - Folder in which all BAM files are
+BCF_DIR=<INPUT> #IMPT TO CHANGE - Folder to store output BCF files
 
 # Change directory to the directory where shell script is located for collection of log files
 cd $PBS_O_WORKDIR
@@ -39,7 +38,7 @@ export CHRNO=1
 bcftools mpileup --threads 4 -Ou -q 20 -Q 30 -f "$REFERENCE_GENOME" \
         -r "scaffold_$CHRNO" -b "$(echo $BAM_DIR/BAMfile_list.txt)" | \
         bcftools call --threads 4 -mv -Ob \
-        -o "$OUTDIR/variants_chr$CHRNO.bcf"
+        -o "$BCF_DIR/variants_chr$CHRNO.bcf"
 
 echo "########################"
 echo "VARIANT CALLING COMPLETE"
