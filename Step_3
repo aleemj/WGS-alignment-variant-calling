@@ -17,6 +17,7 @@ module load bcftools
 FASTA_DIR="/path/to/fasta/file/BOleracea"
 BAM_DIR="path/to/BOleracea/bam_files"
 OUTDIR="/path/to/BOleracea/bcf_files"
+REFERENCE_GENOME="/path/to/reference.fa"
 
 # Change directory to the directory where shell script is located for collection of log files
 cd $PBS_O_WORKDIR
@@ -27,7 +28,7 @@ cd $PBS_O_WORKDIR
 # Collating the filenames of all BAM files into a .txt file for bcftools multiple sample variant calling
 # in the same directory as where the BAM files were.
 find "$BAM_DIR" -type f -name "*.bam" | sort | uniq > \
-    "$BAM_DIR/BAMfie_list.txt"
+    "$BAM_DIR/BAMfile_list.txt"
 
 # Specifying the chromosome number to the "CHRNO" variable, according to the RNAME of the aligned reads in the BAM file.
 # Change accordingly to the scaffold/chromosome you wish to call variants for.
@@ -35,10 +36,10 @@ export CHRNO=1
 
 # Perform BCFtools commands using 4 threads, previously determined to have optimal trade-off between computational resource and time.
 # Change the name of the actual FASTA file accordingly
-bcftools mpileup --threads 4 -Ou -q 20 -Q 30 -f "$REFERENCE" \
-        -r "scaffold_$CHRNO" -b "$(echo $BAM_DIR/BAMfie_BOleracea_list.txt)" | \
+bcftools mpileup --threads 4 -Ou -q 20 -Q 30 -f "$REFERENCE_GENOME" \
+        -r "scaffold_$CHRNO" -b "$(echo $BAM_DIR/BAMfile_list.txt)" | \
         bcftools call --threads 4 -mv -Ob \
-        -o "$OUTDIR/Boleracea_variants_scaffold$CHRNO.bcf"
+        -o "$OUTDIR/variants_chr$CHRNO.bcf"
 
 echo "########################"
 echo "VARIANT CALLING COMPLETE"
