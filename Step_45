@@ -1,0 +1,4 @@
+for CHR in {1..22}; do
+    sed "s/export CHRNO=1/export CHRNO=$CHR/" variant_call_chr1.sh > variant_call_chr$CHR.sh
+    qsub variant_call_chr$CHR.sh
+done
