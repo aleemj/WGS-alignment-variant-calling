@@ -17,6 +17,6 @@ for sh_file in "${sh_files[@]}"; do
         echo "Submitting job: $sh_file"
         qsub "$sh_file"
     else
-        echo "VCF file already exists for sample: $sample_name, skipping..."
+        echo "BAM file already exists for sample: $sample_name, skipping..."
     fi
 done
