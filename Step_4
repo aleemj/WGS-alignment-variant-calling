@@ -1,6 +1,6 @@
 ################Step 3: Variant Calling step################
 # Function: This script performs joint variant calling using bcftools for all samples, by chromosome.
-# IMPORTANT: Creates one sh file per chromosone, based on fai reference genome file.
+# this code creates sh files for every chromosome, based on fai file - one should end up with as many sh files as there are chromosomes/scaffolds
 
 #!/bin/bash
 
