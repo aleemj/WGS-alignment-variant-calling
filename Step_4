@@ -10,10 +10,9 @@
 #PBS -P Personal
 
 # Define directories
-VCF_DIR="/home/users/nus/aleemj/scratch/Arugula/vcf_files" # Directory containing VCF files
 PLINK_DIR="/home/users/nus/aleemj/scratch/Arugula/plink_files" # Directory for PLINK files
-PLINK="/home/users/nus/aleemj/plink" # Path to the PLINK executable
-BCF_DIR="/path/to/Boleracea/BCF_files"
+PLINK="/home/users/nus/aleemj/plink"     # Path to the PLINK executable
+BCF_DIR="/path/to/output_bcf"            # Replace with the actual output directory path
 
 # Create directories only if they do not exist
 [ ! -d "$PLINK_DIR" ] && mkdir -p "$PLINK_DIR"
@@ -29,21 +28,20 @@ cd $PBS_O_WORKDIR
 
 # Save the BCF files into a single text file
 find "$BCF_DIR" -type f -name "*.bcf" | sort | uniq > \
-    "$BCF_DIR/Boleracea_bcfs_merge.txt"
+    "$BCF_DIR/bcfs_merge.txt"
 
 # Indexing all of the BCF files
 while IFS= read -r bcf_file; do
     # Run bcftools index on each BCF file
     bcftools index -f "$bcf_file"
-done < "$BCF_DIR/Boleracea_bcfs_merge.txt"
+done < "$BCF_DIR/bcfs_merge.txt"
 
 echo "#####################"
 echo "BCF INDEXING COMPLETE"
 echo "#####################"
 
 # Merging the indexed BCF files using 4 threads
-cat "$BCF_DIR/Boleracea_bcfs_merge.txt" | xargs bcftools concat -a --threads 4 \
-    -o "$OUTDIR/Merged_BrassicaOleracea_BeforeFilter.vcf.gz" -O z
+cat "$BCF_DIR/bcfs_merge.txt" | xargs bcftools concat -a --threads 4 -o "$OUTDIR/Merged_BrassicaOleracea_BeforeFilter.vcf.gz" -O z
 
 echo "####################"
 echo "BCF MERGING COMPLETE"
