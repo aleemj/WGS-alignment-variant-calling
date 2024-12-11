@@ -11,11 +11,9 @@ module load samtools
 REFERENCE_GENOME="/path/to/reference.fa"  # Replace with the actual reference genome path
 BAM_DIR="/path/to/bam_files"             # Replace with the actual BAM directory path
 BCF_DIR="/path/to/output_bcf"            # Replace with the actual output directory path
-SCRIPT_DIR="/path/to/job_scripts"        # Replace with the directory to store job scripts
 
 # Ensure output directories exist
 [ -d "$BCF_DIR" ] || mkdir -p "$BCF_DIR"
-[ -d "$SCRIPT_DIR" ] || mkdir -p "$SCRIPT_DIR"
 
 # Ensure the reference genome is indexed
 if [ ! -f "${REFERENCE_GENOME}.fai" ]; then
@@ -35,7 +33,7 @@ find "$BAM_DIR" -type f -name "*.bam" | sort | uniq > \
 
 # Generate jobs for each chromosome
 for CHR in $CHROMOSOMES; do
-    JOB_SCRIPT="$SCRIPT_DIR/variant_call_${CHR}.sh"
+    JOB_SCRIPT="$BCF_DIR/variant_call_${CHR}.sh"
     OUTPUT_BCF="$BCF_DIR/variants_${CHR}.bcf"
 
     # Skip if the BCF file for this chromosome already exists
