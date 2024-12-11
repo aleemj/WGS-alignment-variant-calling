@@ -28,8 +28,7 @@ CHROMOSOMES=$(awk '{print $1}' "${REFERENCE_GENOME}.fai")
 
 # Collating the filenames of all BAM files into a .txt file for bcftools multiple sample variant calling
 # in the same directory as where the BAM files were.
-find "$BAM_DIR" -type f -name "*.bam" | sort | uniq > \
-    "$BAM_DIR/BAMfile_list.txt"
+find "$BAM_DIR" -type f -name "*.bam" | sort | uniq > "$BAM_DIR/BAMfile_list.txt"
 
 # Generate jobs for each chromosome
 for CHR in $CHROMOSOMES; do
@@ -54,11 +53,8 @@ for CHR in $CHROMOSOMES; do
 module load bcftools
 
 # Perform variant calling for chromosome $CHR
-bcftools mpileup --threads 4 -Ou -q 20 -Q 30 -f "$REFERENCE_GENOME" \
-    -r "$CHR" -b "$BAM_DIR/BAMfile_list.txt" | \
-    bcftools call --threads 4 -mv -Ob -o "$OUTPUT_BCF"
+bcftools mpileup --threads 4 -Ou -q 20 -Q 30 -f "$REFERENCE_GENOME" -r "$CHR" -b "$BAM_DIR/BAMfile_list.txt" | bcftools call --threads 4 -mv -Ob -o "$OUTPUT_BCF"
 
-echo "Variant calling completed for chromosome $CHR"
 EOF
 
 done
