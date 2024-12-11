@@ -10,12 +10,12 @@
 #PBS -P Personal
 
 # Define directories
-PLINK_DIR="/home/users/nus/aleemj/scratch/Arugula/plink_files" # Directory for PLINK files
+OUT_DIR="/path/to/OUTPUT_FILES" # Directory for PLINK files
 PLINK="/home/users/nus/aleemj/plink"     # Path to the PLINK executable
-BCF_DIR="/path/to/output_bcf"            # Replace with the actual output directory path
+BCF_DIR="/path/to/individual_bcf"            # Replace with the actual output directory path
 
 # Create directories only if they do not exist
-[ ! -d "$PLINK_DIR" ] && mkdir -p "$PLINK_DIR"
+[ ! -d "$OUT_DIR" ] && mkdir -p "$OUT_DIR"
 
 # Load bcftools module
 module load bcftools
@@ -30,42 +30,33 @@ cd $PBS_O_WORKDIR
 find "$BCF_DIR" -type f -name "*.bcf" | sort | uniq > \
     "$BCF_DIR/bcfs_merge.txt"
 
-# Indexing all of the BCF files
-while IFS= read -r bcf_file; do
-    # Run bcftools index on each BCF file
-    bcftools index -f "$bcf_file"
-done < "$BCF_DIR/bcfs_merge.txt"
-
-echo "#####################"
-echo "BCF INDEXING COMPLETE"
-echo "#####################"
-
 # Merging the indexed BCF files using 4 threads
-cat "$BCF_DIR/bcfs_merge.txt" | xargs bcftools concat -a --threads 4 -o "$OUTDIR/Merged_BrassicaOleracea_BeforeFilter.vcf.gz" -O z
+cat "$BCF_DIR/bcfs_merge.txt" | xargs bcftools concat -a --threads 4 -o "$OUT_DIR/Merged_BeforeFilter.vcf.gz" -O z
 
 echo "####################"
 echo "BCF MERGING COMPLETE"
 echo "####################"
 
-bcftools index "$OUTDIR/Merged_BrassicaOleracea_BeforeFilter.vcf.gz"
+#index merged vcf file
+bcftools index "$OUT_DIR/Merged_BeforeFilter.vcf.gz"
 
 # Convert the merged VCF to PLINK format
-$PLINK --vcf "$MERGED_VCF" --keep-allele-order --allow-extra-chr --allow-no-sex --double-id --make-bed --out "$PLINK_DIR/filtered_samples_temp"
+$PLINK --vcf "$OUT_DIR/Merged_BeforeFilter.vcf.gz" --keep-allele-order --allow-extra-chr --allow-no-sex --double-id --make-bed --out "$OUT_DIR/filtered_samples_temp"
 
 # Apply SNPs only filter
-$PLINK --bfile "$PLINK_DIR/filtered_samples_temp" --keep-allele-order --allow-extra-chr --allow-no-sex --snps-only --make-bed --out "$PLINK_DIR/filtered_samples_snps"
+$PLINK --bfile "$OUT_DIR/filtered_samples_temp" --keep-allele-order --allow-extra-chr --allow-no-sex --snps-only --make-bed --out "$OUT_DIR/filtered_samples_snps"
 
 # Apply missing genotype filter
-$PLINK --bfile "$PLINK_DIR/filtered_samples_snps" --keep-allele-order --allow-extra-chr --allow-no-sex --geno 0.1 --make-bed --out "$PLINK_DIR/filtered_samples_snps_geno"
+$PLINK --bfile "$OUT_DIR/filtered_samples_snps" --keep-allele-order --allow-extra-chr --allow-no-sex --geno 0.1 --make-bed --out "$OUT_DIR/filtered_samples_snps_geno"
 
 # Apply MAF filter
-$PLINK --bfile "$PLINK_DIR/filtered_samples_snps_geno" --keep-allele-order --allow-extra-chr --allow-no-sex --maf 0.05 --make-bed --out "$PLINK_DIR/filtered_samples_snps_geno_maf"
+$PLINK --bfile "$OUT_DIR/filtered_samples_snps_geno" --keep-allele-order --allow-extra-chr --allow-no-sex --maf 0.05 --make-bed --out "$OUT_DIR/filtered_samples_snps_geno_maf"
 
 # Deal with duplicate variant ID names
-$PLINK --bfile "$PLINK_DIR/filtered_samples_snps_geno_maf" --keep-allele-order --allow-extra-chr --allow-no-sex --set-missing-var-ids @:# --make-bed --out "$PLINK_DIR/final"
+$PLINK --bfile "$OUT_DIR/filtered_samples_snps_geno_maf" --keep-allele-order --allow-extra-chr --allow-no-sex --set-missing-var-ids @:# --make-bed --out "$OUT_DIR/final"
 
 # Create a PED file from the BED file
-$PLINK --bfile "$PLINK_DIR/final" --keep-allele-order --allow-no-sex --allow-extra-chr --recode --tab --out "$PLINK_DIR/final"
+$PLINK --bfile "$OUT_DIR/final" --keep-allele-order --allow-no-sex --allow-extra-chr --recode --tab --out "$OUT_DIR/final"
 
 # Create a final VCF file from the BED file
-$PLINK --bfile "$PLINK_DIR/final" --keep-allele-order --allow-no-sex --allow-extra-chr --recode vcf --out "$PLINK_DIR/final"
+$PLINK --bfile "$OUT_DIR/final" --keep-allele-order --allow-no-sex --allow-extra-chr --recode vcf --out "$OUT_DIR/final"
