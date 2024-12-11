@@ -4,7 +4,7 @@
 
 #!/bin/bash
 #PBS -q normal
-#PBS -l select=1:ncpus=4:mem=100G
+#PBS -l select=1:ncpus=4:mem=64G
 #PBS -l walltime=24:00:00
 #PBS -N Merge_vcf
 #PBS -P Personal
