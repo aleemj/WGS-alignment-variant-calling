@@ -55,6 +55,9 @@ module load bcftools
 # Perform variant calling for chromosome $CHR
 bcftools mpileup --threads 4 -Ou -q 20 -Q 30 -f "$REFERENCE_GENOME" -r "$CHR" -b "$BAM_DIR/BAMfile_list.txt" | bcftools call --threads 4 -mv -Ob -o "$OUTPUT_BCF"
 
+# Indexing BCF file for chromosome $CHR
+bcftools index -f "$OUTPUT_BCF"
+
 EOF
 
 done
