@@ -14,10 +14,10 @@ for sh_file in "${sh_files[@]}"; do
     sample_name=$(basename "$sh_file" .sh)
     # Use a wildcard to match any BAM file starting with the sample name
     bam_file_pattern="$BAM_DIR/${sample_name}.bam*"
-    bam_files=( $bam_file_pattern ) # Expand the pattern into an array of matching files
-    
-    # Check if no files matched the pattern
-    if [ ${#bam_files[@]} -eq 0 ]; then
+    # Use `find` to check if any matching files exist
+    matching_files=$(find "$BAM_DIR" -type f -name "${sample_name}.bam*" | wc -l)
+
+    if [ "$matching_files" -eq 0 ]; then
         echo "Submitting job: $sh_file"
         qsub "$sh_file"
     else
