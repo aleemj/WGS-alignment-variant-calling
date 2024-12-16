@@ -5,6 +5,8 @@ Last updated by Adrian on 16 December 2024
 
 ##########Latest update##########
 
+16 Dec 2024: All code have been edited for joint variant calling implementation with multi-threading.
+
 ##########UPDATE notes for Adrian##########
 
 *multithreading implemented for all steps, BWA, bcftools and samtools (not sure if worth it yet)
