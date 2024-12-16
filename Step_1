@@ -1,6 +1,7 @@
 ################Step 1: Create SH Files for Each Sample################
 #Function: This script creates a .sh file for each sample, which includes commands for alignment, variant calling, and VCF reheadering.
 #this code creates sh files for every sample - one should end up with as many sh files as there are samples
+#WARNING: MULTITHREADED
 
 #!/bin/bash
 
