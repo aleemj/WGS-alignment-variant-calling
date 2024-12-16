@@ -1,6 +1,7 @@
 ################Step 4: Merge and Filter VCF Files################
 # Function: This script merges individual VCF files, applies PLINK filters, and converts the files to PLINK format.
 # It will be helpful to run this as an sh file.
+#WARNING: MULTITHREADED
 
 #!/bin/bash
 #PBS -q normal
