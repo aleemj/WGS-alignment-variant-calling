@@ -42,7 +42,7 @@ for SAMPLE_DIR in "$PARENT_DIR"/*; do
         {
             echo "#!/bin/bash"
             echo "#PBS -q normal"
-            echo "#PBS -l select=1:ncpus=1:mem=100G"
+            echo "#PBS -l select=1:ncpus=4:mem=100G"
             echo "#PBS -l walltime=24:00:00"
             echo "#PBS -N $SAMPLE_NAME"
             echo "#PBS -P Personal"
@@ -57,10 +57,10 @@ for SAMPLE_DIR in "$PARENT_DIR"/*; do
             echo "cat $SAMPLE_DIR/*_2.fq.gz > $INTERMEDIATE_DIR/${SAMPLE_NAME}_R2.fq.gz"
 
             # BWA MEM for alignment
-            echo "bwa mem $REFERENCE_GENOME $INTERMEDIATE_DIR/${SAMPLE_NAME}_R1.fq.gz $INTERMEDIATE_DIR/${SAMPLE_NAME}_R2.fq.gz | samtools sort -o $BAM_DIR/${SAMPLE_NAME}.bam"
+            echo "bwa mem -t 4 $REFERENCE_GENOME $INTERMEDIATE_DIR/${SAMPLE_NAME}_R1.fq.gz $INTERMEDIATE_DIR/${SAMPLE_NAME}_R2.fq.gz | samtools sort -o $BAM_DIR/${SAMPLE_NAME}.bam"
 
             # Index the BAM file
-            echo "samtools index $BAM_DIR/${SAMPLE_NAME}.bam"
+            echo "samtools index --threads 4 $BAM_DIR/${SAMPLE_NAME}.bam"
 
         } > "$OUTPUT_SH"
 
