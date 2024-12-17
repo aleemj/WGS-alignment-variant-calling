@@ -61,7 +61,7 @@ for SAMPLE_DIR in "$PARENT_DIR"/*; do
             echo "bwa mem -t 4 $REFERENCE_GENOME $INTERMEDIATE_DIR/${SAMPLE_NAME}_R1.fq.gz $INTERMEDIATE_DIR/${SAMPLE_NAME}_R2.fq.gz | samtools sort -o $BAM_DIR/${SAMPLE_NAME}.bam"
 
             # Index the BAM file
-            echo "samtools index --threads 4 $BAM_DIR/${SAMPLE_NAME}.bam"
+            echo "samtools index $BAM_DIR/${SAMPLE_NAME}.bam"
 
         } > "$OUTPUT_SH"
 
