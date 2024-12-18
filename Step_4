@@ -10,6 +10,8 @@
 #PBS -N Merge_vcf
 #PBS -P Personal
 
+cd $PBS_O_WORKDIR
+
 # Define directories
 OUT_DIR="/path/to/OUTPUT_FILES" # Directory for PLINK files
 PLINK="/home/users/nus/aleemj/plink"     # Path to the PLINK executable
@@ -20,12 +22,6 @@ BCF_DIR="/path/to/individual_bcf"            # Replace with the actual output di
 
 # Load bcftools module
 module load bcftools
-
-# Change directory to the directory where shell script is located for collection of log files
-cd $PBS_O_WORKDIR
-
-# if no log folder, then make one
-[ -d log ] || mkdir log
 
 # Save the BCF files into a single text file
 find "$BCF_DIR" -type f -name "*.bcf" | sort | uniq > \
